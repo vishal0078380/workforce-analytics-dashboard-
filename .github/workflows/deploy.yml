@@ -7,7 +7,6 @@ on:
     branches: [main]
 
 jobs:
-  # ── STAGE 1: BUILD ──────────────────────────────────────
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -33,7 +32,6 @@ jobs:
           name: build-files
           path: build/
 
-  # ── STAGE 2: TEST ───────────────────────────────────────
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -52,16 +50,14 @@ jobs:
 
       - name: API Health Check
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            https://18sft68stl.execute-api.ap-south-1.amazonaws.com/prod/analytics)
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://18sft68stl.execute-api.ap-south-1.amazonaws.com/prod/analytics)
           echo "API Status: $STATUS"
           if [ "$STATUS" != "200" ] && [ "$STATUS" != "401" ]; then
-            echo "❌ API health check failed with status $STATUS"
+            echo "API health check failed with status $STATUS"
             exit 1
           fi
-          echo "✅ API is reachable"
+          echo "API is reachable"
 
-  # ── STAGE 3: DEPLOY ─────────────────────────────────────
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
@@ -86,13 +82,10 @@ jobs:
 
       - name: Deploy to S3
         run: |
-          aws s3 sync build/ s3://workforce-dashboard-bucket \
-            --delete \
-            --region ap-south-1
-          echo "✅ Frontend deployed to S3"
+          aws s3 sync build/ s3://workforce-dashboard-bucket --delete --region ap-south-1
+          echo "Frontend deployed to S3"
 
       - name: Verify deployment
         run: |
-          echo "✅ Deployment complete!"
-          echo "🌐 Live URL: http://workforce-dashboard-bucket.s3-website.ap-south-1.amazonaws.com"
-EOF 
+          echo "Deployment complete"
+          echo "Live URL: http://workforce-dashboard-bucket.s3-website.ap-south-1.amazonaws.com"
